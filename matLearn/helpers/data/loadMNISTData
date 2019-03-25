@@ -1,0 +1,31 @@
+%% Description of demo_multiclass_CNN.m
+% Comparison of multiclass classification using multiclass logistic
+% regression and simplest possible CNN with one convolution and one mean
+% pooling layer feeding into softmax
+
+% load data from CNN
+
+load digits.mat
+maxPixel = 255;
+X = X ./ maxPixel;
+options_cnn = [];
+% Configuration
+options_cnn.imageDim = 16; % 28;
+options_cnn.nClasses = 10;  % Number of classes (MNIST images fall into 10 classes)
+% numImages = size(images,3);
+options_cnn.filterDim = 7;    % Filter size for conv layer
+options_cnn.nFilters = 2;   % Number of filters for conv layer
+options_cnn.poolDim = 2;      % Pooling dimension, (should divide imageDim-filterDim+1)
+
+% Load MNIST Train
+% addpath ../common/;
+images = loadMNISTImages('../common/train-images.idx3-ubyte');
+% images = reshape(images,imageDim,imageDim,[]);
+% labels = loadMNISTLabels();
+% labels(labels==0) = 10; % Remap 0 to 10
+
+model_lg = ml_multiclass_CNN(X, y, options_cnn);
+yhat_lg = model_lg.predict(model_lg, Xtest);
+testError_lg = mean(yhat_lg ~= ytest);
+fprintf('Averaged misclassification test error with %s is: %.3f\n', model_lg.name, testError_lg);
+
