@@ -4,7 +4,7 @@ matLearn: machine learning algorithm implementations in Matlab
 
 ## Disclaimer: 
 
-This package is the result of a group effort during our Machine Learning course in the Fall 2014, CPSC 540 taught by Dr. Mark Schmid at UBC. Back then, it wasn't any Tensorflow, Caffe, Torch, and PyTorch library to make your life this much easy, and most of the machine learning and deep learning implementations have been done using MATLAB. I clearly remember to write a Deep Belief Network (DBN) library (+3K line of codes) in MATLAB for my first *deep learning* paper in 2014 when the first versin of Caffe and TF had been released early 2015. So, I think keep tracking the history is sometimes useful, and maybe in future somebody needs this package! 
+This package is the result of a group effort during our Machine Learning course in the Fall 2014, CPSC 540 taught by Dr. Mark Schmid at UBC. Back then, it wasn't any Tensorflow, Caffe, Torch, and PyTorch library to make your life this much easy, and most of the machine learning and deep learning implementations have been done using MATLAB. I clearly remember to write a Deep Belief Network (DBN) library (+3K line of codes) in MATLAB for my first *deep learning* paper in 2014 when the first versin of Caffe and TF had been released early 2015. So, I think keep tracking the history is sometimes useful, and maybe in future somebody need this package! 
 
 You can find the full description and the info about main people behind collecting, testing, and updating the package in the [project website](https://www.cs.ubc.ca/~schmidtm/Software/matLearn.html). 
 
