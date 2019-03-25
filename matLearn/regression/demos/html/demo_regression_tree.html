@@ -1,0 +1,163 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_regression_tree</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-06-07"><meta name="DC.source" content="demo_regression_tree.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Description of demo_regression_tree.m</a></li><li><a href="#2">usage of constant regression stump (consGroups data)</a></li><li><a href="#3">usage of constant regression tree (consGroups data)</a></li><li><a href="#5">usage of linear regression stump (linGroups data)</a></li><li><a href="#6">usage of linear regression tree  (linGroups data)</a></li></ul></div><h2>Description of demo_regression_tree.m<a name="1"></a></h2><p>Demonstrates stump and tree regression with either constant (mean) or linear (minimizing sum of squares) prediction for each subset of the training data space</p><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+generateData_consGroups
+</pre><h2>usage of constant regression stump (consGroups data)<a name="2"></a></h2><pre class="codeinput">options_st1 = [];
+options_st1.modelType = <span class="string">'cns'</span>;
+model_st1 = ml_regression_stump(Xtrain, ytrain, options_st1);
+yhat_st1 = model_st1.predict(model_st1, Xtest);
+testError_st1 = mean(abs(yhat_st1 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_st1.name, testError_st1);
+</pre><pre class="codeoutput">Averaged absolute test error with Stump Regression is: 0.254
+</pre><h2>usage of constant regression tree (consGroups data)<a name="3"></a></h2><pre class="codeinput">options_tr1 = [];
+options_tr1.modelType = <span class="string">'cns'</span>;
+options_tr1.splitSample = <span class="string">'bf'</span>;
+model_tr1 = ml_regression_tree(Xtrain, ytrain, options_tr1);
+yhat_tr1 = model_tr1.predict(model_tr1, Xtest);
+testError_tr1 = mean(abs(yhat_tr1 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_tr1.name, testError_tr1);
+</pre><pre class="codeoutput">Averaged absolute test error with Regression Tree is: 0.273
+</pre><pre class="codeinput">plotRegression1D(Xtrain, ytrain, model_st1, model_tr1);
+title(<span class="string">'Constant'</span>);
+
+generateData_linGroups
+</pre><img vspace="5" hspace="5" src="demo_regression_tree_01.png" alt=""> <h2>usage of linear regression stump (linGroups data)<a name="5"></a></h2><pre class="codeinput">options_st2 = [];
+options_st2.modelType = <span class="string">'lin'</span>;
+model_st2 = ml_regression_stump(Xtrain, ytrain, options_st2);
+yhat_st2 = model_st2.predict(model_st2, Xtest);
+testError_st2 = mean(abs(yhat_st2 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_st2.name, testError_st2);
+</pre><pre class="codeoutput">Averaged absolute test error with Stump Regression is: 0.507
+</pre><h2>usage of linear regression tree  (linGroups data)<a name="6"></a></h2><pre class="codeinput">options_tr2 = [];
+options_tr2.modelType = <span class="string">'lin'</span>;
+options_tr2.splitSample = <span class="string">'bf'</span>;
+model_tr2 = ml_regression_tree(Xtrain, ytrain, options_tr2);
+yhat_tr2 = model_tr2.predict(model_tr2, Xtest);
+testError_tr2 = mean(abs(yhat_tr2 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_tr2.name, testError_tr2);
+</pre><pre class="codeoutput">Averaged absolute test error with Regression Tree is: 0.527
+</pre><pre class="codeinput">plotRegression1D(Xtrain, ytrain, model_st2, model_tr2);
+title(<span class="string">'Linear'</span>);
+</pre><img vspace="5" hspace="5" src="demo_regression_tree_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Description of demo_regression_tree.m
+% Demonstrates stump and tree regression with either constant (mean) or
+% linear (minimizing sum of squares) prediction for each subset of the
+% training data space
+
+clear all
+close all
+generateData_consGroups
+
+%% usage of constant regression stump (consGroups data)
+options_st1 = [];
+options_st1.modelType = 'cns';
+model_st1 = ml_regression_stump(Xtrain, ytrain, options_st1);
+yhat_st1 = model_st1.predict(model_st1, Xtest);
+testError_st1 = mean(abs(yhat_st1 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_st1.name, testError_st1);
+
+%% usage of constant regression tree (consGroups data)
+options_tr1 = [];
+options_tr1.modelType = 'cns';
+options_tr1.splitSample = 'bf';
+model_tr1 = ml_regression_tree(Xtrain, ytrain, options_tr1);
+yhat_tr1 = model_tr1.predict(model_tr1, Xtest);
+testError_tr1 = mean(abs(yhat_tr1 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_tr1.name, testError_tr1);
+
+%%
+plotRegression1D(Xtrain, ytrain, model_st1, model_tr1);
+title('Constant');
+
+generateData_linGroups
+
+%% usage of linear regression stump (linGroups data)
+options_st2 = [];
+options_st2.modelType = 'lin';
+model_st2 = ml_regression_stump(Xtrain, ytrain, options_st2);
+yhat_st2 = model_st2.predict(model_st2, Xtest);
+testError_st2 = mean(abs(yhat_st2 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_st2.name, testError_st2);
+
+%% usage of linear regression tree  (linGroups data)
+options_tr2 = [];
+options_tr2.modelType = 'lin';
+options_tr2.splitSample = 'bf';
+model_tr2 = ml_regression_tree(Xtrain, ytrain, options_tr2);
+yhat_tr2 = model_tr2.predict(model_tr2, Xtest);
+testError_tr2 = mean(abs(yhat_tr2 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_tr2.name, testError_tr2);
+
+%%
+plotRegression1D(Xtrain, ytrain, model_st2, model_tr2);
+title('Linear');
+##### SOURCE END #####
+--></body></html>

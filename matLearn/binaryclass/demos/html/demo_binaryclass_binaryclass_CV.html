@@ -1,0 +1,198 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_binaryclass_binaryclass_CV</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-05-31"><meta name="DC.source" content="demo_binaryclass_binaryclass_CV.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Description of demo_binaryclass_binaryclass_CV.m</a></li><li><a href="#2">usage of RBF basis logistic regression</a></li><li><a href="#3">usage of RBF basis logistic regression with CV on sigma</a></li><li><a href="#4">usage of sigmoid basis logistic regression with CV on sigma and lambda (L2 regularizer)</a></li></ul></div><h2>Description of demo_binaryclass_binaryclass_CV.m<a name="1"></a></h2><p>Demonstrates usage of ml_general_CV on model parameters for binary classification using logistic regression under RBF basis</p><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+generateData_vert
+</pre><h2>usage of RBF basis logistic regression<a name="2"></a></h2><pre class="codeinput">options_bs = [];
+options_bs.subModel = @ml_binaryclass_logistic;
+options_bs.subOptions.addBias = 1;
+options_bs.subOptions.lambdaL2 = 7;
+options_bs.basisFunc = @ml_kernel_rbf;
+options_bs.basisOptions.sigma = 2;
+model_bs = ml_binaryclass_basis(Xtrain, ytrain, options_bs);
+yhat_bs = model_bs.predict(model_bs, Xtest);
+testError_bs = mean(yhat_bs ~= ytest);
+fprintf(<span class="string">'Averaged misclassification test error with %s is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_bs.name, testError_bs);
+figure;
+plot2DClassifier(Xtrain, ytrain, model_bs)
+</pre><pre class="codeoutput">Averaged misclassification test error with Binary Classification under Basis Change, RBF Kernel is: 0.031
+</pre><img vspace="5" hspace="5" src="demo_binaryclass_binaryclass_CV_01.png" alt=""> <h2>usage of RBF basis logistic regression with CV on sigma<a name="3"></a></h2><pre class="codeinput">options_cv1 = [];
+options_cv1.subModel = @ml_binaryclass_basis;
+options_cv1.subOptions.subModel = @ml_binaryclass_logistic;
+options_cv1.subOptions.subOptions.addBias = 1;
+options_cv1.subOptions.subOptions.lambdaL2 = 2;
+options_cv1.subOptions.basisFunc = @ml_kernel_rbf;
+options_cv1.paramNames = <span class="string">'basisOptions.sigma'</span>;
+options_cv1.paramValues = [0.5 1 1.5 2 2.5]';
+options_cv1.nParams = 1;
+options_cv1.loss = <span class="string">'mc'</span>;
+model_cv1 = ml_general_CV(Xtrain, ytrain, options_cv1);
+yhat_cv1 = model_cv1.predict(model_cv1, Xtest);
+testError_cv1 = mean(yhat_cv1 ~= ytest);
+fprintf(<span class="string">'Averaged misclassification test error with %s is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_cv1.name, testError_cv1);
+fprintf(<span class="string">'Best %s is: %.3f\n'</span>, options_cv1.paramNames, model_cv1.bestParams);
+figure;
+plot2DClassifier(Xtrain, ytrain, model_cv1)
+</pre><pre class="codeoutput">Averaged misclassification test error with CV on:  basisOptions.sigma is: 0.089
+Best basisOptions.sigma is: 0.500
+</pre><img vspace="5" hspace="5" src="demo_binaryclass_binaryclass_CV_02.png" alt=""> <h2>usage of sigmoid basis logistic regression with CV on sigma and lambda (L2 regularizer)<a name="4"></a></h2><pre class="codeinput">options_cv2 = [];
+options_cv2.subModel = @ml_binaryclass_basis;
+options_cv2.subOptions.subModel = @ml_binaryclass_logistic;
+options_cv2.subOptions.subOptions.addBias = 1;
+options_cv2.subOptions.basisFunc = @ml_kernel_rbf;
+options_cv2.paramNames = {<span class="string">'basisOptions.sigma'</span>,<span class="string">'subOptions.lambdaL2'</span>};
+options_cv2.paramValues = {[0.5 1 1.5 2 2.5], [0.5 1 1.5 2 2.5]};
+options_cv2.nParams = 2;
+options_cv2.loss = <span class="string">'mc'</span>;
+model_cv2 = ml_general_CV(Xtrain, ytrain, options_cv2);
+yhat_cv2 = model_cv2.predict(model_cv2, Xtest);
+testError_cv2 = mean(yhat_cv2 ~= ytest);
+fprintf(<span class="string">'Averaged misclassification test error with %s is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_cv2.name, testError_cv2);
+fprintf(<span class="string">'Best %s is: %.3f\n'</span>, options_cv2.paramNames{1}, <span class="keyword">...</span>
+        model_cv2.bestParams(1));
+fprintf(<span class="string">'Best %s is: %.3f\n'</span>, options_cv2.paramNames{2}, <span class="keyword">...</span>
+        model_cv2.bestParams(2));
+figure;
+plot2DClassifier(Xtrain, ytrain, model_cv2);
+</pre><pre class="codeoutput">Averaged misclassification test error with CV on: basisOptions.sigma &amp; subOptions.lambdaL2 is: 0.116
+Best basisOptions.sigma is: 0.500
+Best subOptions.lambdaL2 is: 0.500
+</pre><img vspace="5" hspace="5" src="demo_binaryclass_binaryclass_CV_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Description of demo_binaryclass_binaryclass_CV.m
+% Demonstrates usage of ml_general_CV on model parameters for binary
+% classification using logistic regression under RBF basis
+
+clear all
+close all
+generateData_vert
+
+%% usage of RBF basis logistic regression
+options_bs = [];
+options_bs.subModel = @ml_binaryclass_logistic;
+options_bs.subOptions.addBias = 1;
+options_bs.subOptions.lambdaL2 = 7;
+options_bs.basisFunc = @ml_kernel_rbf;
+options_bs.basisOptions.sigma = 2;
+model_bs = ml_binaryclass_basis(Xtrain, ytrain, options_bs);
+yhat_bs = model_bs.predict(model_bs, Xtest);
+testError_bs = mean(yhat_bs ~= ytest);
+fprintf('Averaged misclassification test error with %s is: %.3f\n', ...
+        model_bs.name, testError_bs);
+figure;
+plot2DClassifier(Xtrain, ytrain, model_bs)
+
+%% usage of RBF basis logistic regression with CV on sigma
+options_cv1 = [];
+options_cv1.subModel = @ml_binaryclass_basis;
+options_cv1.subOptions.subModel = @ml_binaryclass_logistic;
+options_cv1.subOptions.subOptions.addBias = 1;
+options_cv1.subOptions.subOptions.lambdaL2 = 2;
+options_cv1.subOptions.basisFunc = @ml_kernel_rbf;
+options_cv1.paramNames = 'basisOptions.sigma';
+options_cv1.paramValues = [0.5 1 1.5 2 2.5]';
+options_cv1.nParams = 1;
+options_cv1.loss = 'mc';
+model_cv1 = ml_general_CV(Xtrain, ytrain, options_cv1);
+yhat_cv1 = model_cv1.predict(model_cv1, Xtest);
+testError_cv1 = mean(yhat_cv1 ~= ytest);
+fprintf('Averaged misclassification test error with %s is: %.3f\n', ...
+        model_cv1.name, testError_cv1);
+fprintf('Best %s is: %.3f\n', options_cv1.paramNames, model_cv1.bestParams);
+figure;
+plot2DClassifier(Xtrain, ytrain, model_cv1)
+
+%% usage of sigmoid basis logistic regression with CV on sigma and lambda (L2 regularizer)
+options_cv2 = [];
+options_cv2.subModel = @ml_binaryclass_basis;
+options_cv2.subOptions.subModel = @ml_binaryclass_logistic;
+options_cv2.subOptions.subOptions.addBias = 1;
+options_cv2.subOptions.basisFunc = @ml_kernel_rbf;
+options_cv2.paramNames = {'basisOptions.sigma','subOptions.lambdaL2'};
+options_cv2.paramValues = {[0.5 1 1.5 2 2.5], [0.5 1 1.5 2 2.5]};
+options_cv2.nParams = 2;
+options_cv2.loss = 'mc';
+model_cv2 = ml_general_CV(Xtrain, ytrain, options_cv2);
+yhat_cv2 = model_cv2.predict(model_cv2, Xtest);
+testError_cv2 = mean(yhat_cv2 ~= ytest);
+fprintf('Averaged misclassification test error with %s is: %.3f\n', ...
+        model_cv2.name, testError_cv2);
+fprintf('Best %s is: %.3f\n', options_cv2.paramNames{1}, ...
+        model_cv2.bestParams(1));
+fprintf('Best %s is: %.3f\n', options_cv2.paramNames{2}, ...
+        model_cv2.bestParams(2));
+figure;
+plot2DClassifier(Xtrain, ytrain, model_cv2);
+
+
+##### SOURCE END #####
+--></body></html>

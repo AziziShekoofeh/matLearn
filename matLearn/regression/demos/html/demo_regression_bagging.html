@@ -1,0 +1,177 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_regression_bagging</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-06-07"><meta name="DC.source" content="demo_regression_bagging.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Description of demo_regression_bagging.m</a></li><li><a href="#2">usage of mean regression (constant data)</a></li><li><a href="#3">usage of bagging mean regression (constant data)</a></li><li><a href="#5">usage of L2 regression (linear data)</a></li><li><a href="#6">usage of bagging L2 regression (linear data)</a></li></ul></div><h2>Description of demo_regression_bagging.m<a name="1"></a></h2><p>Demonstrates bagged mean regression and linear regression models. Red dashed lines are predictions from individual models trained on bootstrap samples of the dataset.</p><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+generateData_constant
+</pre><h2>usage of mean regression (constant data)<a name="2"></a></h2><pre class="codeinput">options_mn = [];
+model_mn = ml_regression_mean(Xtrain, ytrain, options_mn);
+yhat_mn = model_mn.predict(model_mn, Xtest);
+testError_mn = mean(abs(yhat_mn - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_mn.name, testError_mn);
+</pre><pre class="codeoutput">Averaged absolute test error with Mean is: 0.526
+</pre><h2>usage of bagging mean regression (constant data)<a name="3"></a></h2><pre class="codeinput">options_bg3 = [];
+options_bg3.nModels = 5;
+options_bg3.subModel = @ml_regression_mean;
+options_bg3.subOptions.addBias = 1;
+model_bg3 = ml_regression_bagging(Xtrain, ytrain, options_bg3);
+yhat_bg3 = model_bg3.predict(model_bg3, Xtest);
+testError_bg3 = mean(abs(yhat_bg3 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_bg3.name, testError_bg3)
+</pre><pre class="codeoutput">Averaged absolute test error with Bagged Regression is: 0.525
+</pre><pre class="codeinput">plotRegression1D(Xtrain, ytrain, model_bg3, model_mn);
+<span class="keyword">for</span> k = 1:length(model_bg3.trainModels);
+    plot(linspace(-1,1,30),model_bg3.trainModels{k}.predict(model_bg3.trainModels{k}, linspace(-1,1,30)'), <span class="string">'r--'</span>);
+<span class="keyword">end</span>
+title(<span class="string">'Constant'</span>);
+
+generateData_linear
+</pre><img vspace="5" hspace="5" src="demo_regression_bagging_01.png" alt=""> <h2>usage of L2 regression (linear data)<a name="5"></a></h2><pre class="codeinput">options_l2 = [];
+options_l2.addBias = 1;
+model_l2 = ml_regression_L2(Xtrain, ytrain, options_l2);
+yhat_l2 = model_l2.predict(model_l2, Xtest);
+testError_l2 = mean(abs(yhat_l2 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_l2.name, testError_l2);
+</pre><pre class="codeoutput">Averaged absolute test error with Squared Loss Linear Regression is: 0.198
+</pre><h2>usage of bagging L2 regression (linear data)<a name="6"></a></h2><pre class="codeinput">options_bg2 = [];
+options_bg2.nModels = 5;
+options_bg2.subModel = @ml_regression_L2;
+options_bg2.subOptions.addBias = 1;
+model_bg2 = ml_regression_bagging(Xtrain, ytrain, options_bg2);
+yhat_bg2 = model_bg2.predict(model_bg2, Xtest);
+testError_bg2 = mean(abs(yhat_bg2 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, model_bg2.name, testError_bg2)
+</pre><pre class="codeoutput">Averaged absolute test error with Bagged Regression is: 0.233
+</pre><pre class="codeinput">plotRegression1D(Xtrain, ytrain, model_bg2, model_l2);
+<span class="keyword">for</span> k = 1:length(model_bg2.trainModels);
+    plot(linspace(-1,1,30),model_bg2.trainModels{k}.predict(model_bg2.trainModels{k}, linspace(-1,1,30)'), <span class="string">'r--'</span>);
+<span class="keyword">end</span>
+title(<span class="string">'Linear'</span>);
+</pre><img vspace="5" hspace="5" src="demo_regression_bagging_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Description of demo_regression_bagging.m
+% Demonstrates bagged mean regression and linear regression models. Red
+% dashed lines are predictions from individual models trained on bootstrap 
+% samples of the dataset.
+
+clear all
+close all
+generateData_constant
+
+%% usage of mean regression (constant data)
+options_mn = [];
+model_mn = ml_regression_mean(Xtrain, ytrain, options_mn);
+yhat_mn = model_mn.predict(model_mn, Xtest);
+testError_mn = mean(abs(yhat_mn - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_mn.name, testError_mn);
+
+%% usage of bagging mean regression (constant data)
+options_bg3 = [];
+options_bg3.nModels = 5;
+options_bg3.subModel = @ml_regression_mean;
+options_bg3.subOptions.addBias = 1;
+model_bg3 = ml_regression_bagging(Xtrain, ytrain, options_bg3);
+yhat_bg3 = model_bg3.predict(model_bg3, Xtest);
+testError_bg3 = mean(abs(yhat_bg3 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_bg3.name, testError_bg3)
+
+%%
+plotRegression1D(Xtrain, ytrain, model_bg3, model_mn);
+for k = 1:length(model_bg3.trainModels);
+    plot(linspace(-1,1,30),model_bg3.trainModels{k}.predict(model_bg3.trainModels{k}, linspace(-1,1,30)'), 'rREPLACE_WITH_DASH_DASH');
+end
+title('Constant');
+
+generateData_linear
+
+%% usage of L2 regression (linear data)
+options_l2 = [];
+options_l2.addBias = 1;
+model_l2 = ml_regression_L2(Xtrain, ytrain, options_l2);
+yhat_l2 = model_l2.predict(model_l2, Xtest);
+testError_l2 = mean(abs(yhat_l2 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_l2.name, testError_l2);
+
+%% usage of bagging L2 regression (linear data)
+options_bg2 = [];
+options_bg2.nModels = 5;
+options_bg2.subModel = @ml_regression_L2;
+options_bg2.subOptions.addBias = 1;
+model_bg2 = ml_regression_bagging(Xtrain, ytrain, options_bg2);
+yhat_bg2 = model_bg2.predict(model_bg2, Xtest);
+testError_bg2 = mean(abs(yhat_bg2 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', model_bg2.name, testError_bg2)
+
+%%
+plotRegression1D(Xtrain, ytrain, model_bg2, model_l2);
+for k = 1:length(model_bg2.trainModels);
+    plot(linspace(-1,1,30),model_bg2.trainModels{k}.predict(model_bg2.trainModels{k}, linspace(-1,1,30)'), 'rREPLACE_WITH_DASH_DASH');
+end
+title('Linear');
+##### SOURCE END #####
+--></body></html>

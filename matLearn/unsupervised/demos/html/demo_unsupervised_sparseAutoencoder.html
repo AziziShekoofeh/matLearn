@@ -1,0 +1,129 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_unsupervised_sparseAutoencoder</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-07-19"><meta name="DC.source" content="demo_unsupervised_sparseAutoencoder.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Usage of sparse Autoencoder model</a></li><li><a href="#3">Reconstruct original data using model</a></li><li><a href="#4">Visualize weights of final layer</a></li></ul></div><pre class="codeinput">loadMNISTDataset
+
+imsize = sqrt(size(Xtrain,2));
+Xtrain = Xtrain(1:10000,:);
+inds = randi(size(Xtrain,1),200,1);
+plotSquareImages(Xtrain(inds,:));
+</pre><pre class="codeoutput">Decompressing MNIST files...Done.
+Loading MNIST files into Workspace...Ready to train model
+</pre><img vspace="5" hspace="5" src="demo_unsupervised_sparseAutoencoder_01.png" alt=""> <h2>Usage of sparse Autoencoder model<a name="2"></a></h2><pre class="codeinput">options_sae = [];
+options_sae.nHidden = [196];
+<span class="comment">% which hidden layers to add sparsity penalty</span>
+options_sae.sparsify = [1];
+<span class="comment">% sparsity penalty</span>
+options_sae.betas = [3];
+<span class="comment">% target average activations of hidden units in sparse layers expressed</span>
+<span class="comment">% as an average activation</span>
+options_sae.rhos = [0.1];
+<span class="comment">% weight decay</span>
+options_sae.lambda = 3e-3;
+model_sae = ml_unsupervised_sparseAutoencoder(Xtrain, options_sae);
+</pre><h2>Reconstruct original data using model<a name="3"></a></h2><pre class="codeinput">Xrecon = model_sae.predict(model_sae, Xtrain);
+plotSquareImages(Xrecon(inds,:))
+hiddenSize = model_sae.nHidden(1);
+visibleSize = imsize.^2;
+</pre><img vspace="5" hspace="5" src="demo_unsupervised_sparseAutoencoder_02.png" alt=""> <h2>Visualize weights of final layer<a name="4"></a></h2><pre class="codeinput">W1 = reshape(model_sae.w(1:hiddenSize*visibleSize), visibleSize, hiddenSize);
+plotSquareImages(W1');
+</pre><img vspace="5" hspace="5" src="demo_unsupervised_sparseAutoencoder_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+loadMNISTDataset
+
+imsize = sqrt(size(Xtrain,2));
+Xtrain = Xtrain(1:10000,:);
+inds = randi(size(Xtrain,1),200,1);
+plotSquareImages(Xtrain(inds,:));
+
+%% Usage of sparse Autoencoder model
+options_sae = [];
+options_sae.nHidden = [196];
+% which hidden layers to add sparsity penalty
+options_sae.sparsify = [1];
+% sparsity penalty
+options_sae.betas = [3];
+% target average activations of hidden units in sparse layers expressed
+% as an average activation
+options_sae.rhos = [0.1];
+% weight decay
+options_sae.lambda = 3e-3;
+model_sae = ml_unsupervised_sparseAutoencoder(Xtrain, options_sae);
+
+%% Reconstruct original data using model
+Xrecon = model_sae.predict(model_sae, Xtrain);
+plotSquareImages(Xrecon(inds,:))
+hiddenSize = model_sae.nHidden(1);
+visibleSize = imsize.^2;
+
+%% Visualize weights of final layer
+W1 = reshape(model_sae.w(1:hiddenSize*visibleSize), visibleSize, hiddenSize);
+plotSquareImages(W1');
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,176 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_regression_ARD</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-06-07"><meta name="DC.source" content="demo_regression_ARD.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Description of demo_regression_ARD.m</a></li><li><a href="#2">usage of ARD regression</a></li><li><a href="#3">usage of L2 regression</a></li><li><a href="#4">usage of L2 regression with L2 regularization</a></li><li><a href="#5">usage of L1 regression</a></li></ul></div><h2>Description of demo_regression_ARD.m<a name="1"></a></h2><p>Regression using Automatic Relevance Determination to encourage sparsity in learned weight vector with high-dimensional data where most features are uninformative. L2 regression with and without regularization and L1 regression are presented for comparisons</p><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+generateData_irrelevFeatures
+</pre><h2>usage of ARD regression<a name="2"></a></h2><pre class="codeinput">options_ard = [];
+options_ard.addBias = 1;
+options_ard.variance = 0.5;
+model_ard = ml_regression_ARD(Xtrain, ytrain, options_ard);
+yhat_ard = model_ard.predict(model_ard, Xtest);
+testError_ard = mean(abs(yhat_ard - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s and Var %.3f is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_ard.name, options_ard.variance, testError_ard);
+fprintf(<span class="string">'Number of features used is is: %.3f\n'</span>, <span class="keyword">...</span>
+        sum(abs(model_ard.w(2:end)) &gt; 0.05));
+</pre><pre class="codeoutput">Averaged absolute test error with ARD and Var 0.500 is: 0.089
+Number of features used is is: 2.000
+</pre><h2>usage of L2 regression<a name="3"></a></h2><pre class="codeinput">options_l2_1 = [];
+options_l2_1.addBias = 1;
+model_l2_1 = ml_regression_L2(Xtrain, ytrain, options_l2_1);
+yhat_l2_1 = model_l2_1.predict(model_l2_1, Xtest);
+testError_l2_1 = mean(abs(yhat_l2_1 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_l2_1.name, testError_l2_1);
+fprintf(<span class="string">'Number of features used is is: %.3f\n'</span>, <span class="keyword">...</span>
+        sum(abs(model_l2_1.w(2:end)) &gt; 0.05));
+</pre><pre class="codeoutput">Averaged absolute test error with Squared Loss Linear Regression is: 0.089
+Number of features used is is: 10.000
+</pre><h2>usage of L2 regression with L2 regularization<a name="4"></a></h2><pre class="codeinput">options_l2_2 = [];
+options_l2_2.addBias = 1;
+options_l2_2.lambdaL2 = 5;
+model_l2_2 = ml_regression_L2(Xtrain, ytrain, options_l2_2);
+yhat_l2_2 = model_l2_2.predict(model_l2_2, Xtest);
+testError_l2_2 = mean(abs(yhat_l2_2 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s and L2 Reg is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_l2_2.name, testError_l2_2);
+fprintf(<span class="string">'Number of features used is is: %.3f\n'</span>, <span class="keyword">...</span>
+        sum(abs(model_l2_2.w(2:end)) &gt; 0.05));
+</pre><pre class="codeoutput">Averaged absolute test error with Squared Loss Linear Regression and L2 Reg is: 0.127
+Number of features used is is: 2.000
+</pre><h2>usage of L1 regression<a name="5"></a></h2><pre class="codeinput">options_l1 = [];
+options_l1.addBias = 1;
+model_l1 = ml_regression_L1(Xtrain, ytrain, options_l1);
+yhat_l1 = model_l1.predict(model_l1, Xtest);
+testError_l1 = mean(abs(yhat_l1 - ytest));
+fprintf(<span class="string">'Averaged absolute test error with %s is: %.3f\n'</span>, <span class="keyword">...</span>
+        model_l1.name, testError_l1);
+fprintf(<span class="string">'Number of features used is is: %.3f\n'</span>, <span class="keyword">...</span>
+        sum(abs(model_l1.w(2:end)) &gt; 0.05));
+</pre><pre class="codeoutput">Averaged absolute test error with Absolute Loss Linear Regression is: 0.134
+Number of features used is is: 2.000
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Description of demo_regression_ARD.m
+% Regression using Automatic Relevance Determination to encourage sparsity
+% in learned weight vector with high-dimensional data where most features 
+% are uninformative. L2 regression with and without regularization and
+% L1 regression are presented for comparisons
+
+clear all
+close all
+generateData_irrelevFeatures
+
+%% usage of ARD regression
+options_ard = [];
+options_ard.addBias = 1;
+options_ard.variance = 0.5;
+model_ard = ml_regression_ARD(Xtrain, ytrain, options_ard);
+yhat_ard = model_ard.predict(model_ard, Xtest);
+testError_ard = mean(abs(yhat_ard - ytest));
+fprintf('Averaged absolute test error with %s and Var %.3f is: %.3f\n', ...
+        model_ard.name, options_ard.variance, testError_ard);
+fprintf('Number of features used is is: %.3f\n', ...
+        sum(abs(model_ard.w(2:end)) > 0.05));
+
+%% usage of L2 regression
+options_l2_1 = [];
+options_l2_1.addBias = 1;
+model_l2_1 = ml_regression_L2(Xtrain, ytrain, options_l2_1);
+yhat_l2_1 = model_l2_1.predict(model_l2_1, Xtest);
+testError_l2_1 = mean(abs(yhat_l2_1 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', ...
+        model_l2_1.name, testError_l2_1);
+fprintf('Number of features used is is: %.3f\n', ...
+        sum(abs(model_l2_1.w(2:end)) > 0.05));
+
+%% usage of L2 regression with L2 regularization
+options_l2_2 = [];
+options_l2_2.addBias = 1;
+options_l2_2.lambdaL2 = 5;
+model_l2_2 = ml_regression_L2(Xtrain, ytrain, options_l2_2);
+yhat_l2_2 = model_l2_2.predict(model_l2_2, Xtest);
+testError_l2_2 = mean(abs(yhat_l2_2 - ytest));
+fprintf('Averaged absolute test error with %s and L2 Reg is: %.3f\n', ...
+        model_l2_2.name, testError_l2_2);
+fprintf('Number of features used is is: %.3f\n', ...
+        sum(abs(model_l2_2.w(2:end)) > 0.05));
+
+%% usage of L1 regression
+options_l1 = [];
+options_l1.addBias = 1;
+model_l1 = ml_regression_L1(Xtrain, ytrain, options_l1);
+yhat_l1 = model_l1.predict(model_l1, Xtest);
+testError_l1 = mean(abs(yhat_l1 - ytest));
+fprintf('Averaged absolute test error with %s is: %.3f\n', ...
+        model_l1.name, testError_l1);
+fprintf('Number of features used is is: %.3f\n', ...
+        sum(abs(model_l1.w(2:end)) > 0.05));
+##### SOURCE END #####
+--></body></html>

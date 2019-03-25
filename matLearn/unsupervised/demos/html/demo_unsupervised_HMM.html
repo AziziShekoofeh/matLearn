@@ -1,0 +1,279 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>demo_unsupervised_HMM</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-10-18"><meta name="DC.source" content="demo_unsupervised_HMM.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Usage with known observation and transition probability matrix: Viterbi</a></li><li><a href="#3">Usage with unknown parameters: Baum Welch (EM) algorithm</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Demonstrates parameter learning and inference on Hidden Markov Models using classic problem setup of a Casino that switches out a fair die for a loaded die</p><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+
+<span class="comment">% ----- Generate Sequence Data --------------------------------------------</span>
+<span class="comment">% "Occassionally dishonest casino" example</span>
+O = [1/6 , 1/6 , 1/6 , 1/6 , 1/6 , 1/6  ;  <span class="keyword">...</span><span class="comment"> % fair die</span>
+     1/10, 1/10, 1/10, 1/10, 1/10, 5/10 ];   <span class="comment">% loaded die</span>
+T = [1/2 , 1/2; 1/4, 3/4];
+pi = [1/2, 1/2];
+len = 25;
+numSeq = 1;
+seq = ml_sampleMC(T, pi, numSeq, len);
+X = zeros(numSeq, len);
+<span class="comment">% generate observation states from distribution at each hidden state</span>
+<span class="keyword">for</span> k = 1:len
+    <span class="keyword">for</span> p = 1:numSeq
+        X(p, k) = ml_randSampleDiscrete(O(seq(k), :));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Usage with known observation and transition probability matrix: Viterbi<a name="2"></a></h2><pre class="codeinput">options_hmm = [];
+options_hmm.observed = O;
+options_hmm.transition = T;
+options_hmm.pi = pi;
+model_hmm = ml_unsupervised_HMM(X, options_hmm);
+viterbiSeq = model_hmm.Viterbi(model_hmm);
+hmmviterbi(X, T, O)
+individuallyBestSeq = model_hmm.individuallyMostLikely(model_hmm);
+disp(<span class="string">'Individually most likely latent variable states:'</span>)
+disp(individuallyBestSeq);
+disp(<span class="string">'True latent variable states:'</span>)
+disp(seq)
+disp(<span class="string">'Viterbi most likely latent variable sequence:'</span>)
+disp(viterbiSeq)
+disp(<span class="string">'Misclassification rate for Viterbi:'</span>)
+disp(sum(viterbiSeq ~= seq) / length(seq))
+disp(<span class="string">'Misclassification rate for Most Likely Individual States:'</span>)
+disp(sum(individuallyBestSeq ~= seq) / length(seq))
+</pre><pre class="codeoutput">
+ans =
+
+  Columns 1 through 13
+
+     1     1     1     2     2     2     2     2     2     2     2     2     2
+
+  Columns 14 through 25
+
+     2     2     2     2     2     2     2     2     2     2     2     2
+
+Individually most likely latent variable states:
+  Columns 1 through 13
+
+     1     1     1     2     2     2     2     2     1     1     2     2     2
+
+  Columns 14 through 25
+
+     2     2     2     1     1     2     2     2     2     2     2     2
+
+True latent variable states:
+  Columns 1 through 13
+
+     1     1     2     2     2     2     1     1     2     1     2     2     1
+
+  Columns 14 through 25
+
+     2     1     1     1     2     2     2     2     2     2     2     2
+
+Viterbi most likely latent variable sequence:
+  Columns 1 through 13
+
+     1     1     1     2     2     2     2     2     2     2     2     2     2
+
+  Columns 14 through 25
+
+     2     2     2     2     2     2     2     2     2     2     2     2
+
+Misclassification rate for Viterbi:
+    0.3200
+
+Misclassification rate for Most Likely Individual States:
+    0.3200
+
+</pre><h2>Usage with unknown parameters: Baum Welch (EM) algorithm<a name="3"></a></h2><p>Learn the parameters of the occassionaly dishonest casino based only on observations and structure assumption</p><pre class="codeinput">O = [1/6 , 1/6 , 1/6 , 1/6 , 1/6 , 1/6;  <span class="keyword">...</span><span class="comment">  % fair die</span>
+     1/10, 1/10, 1/10, 1/10, 1/10, 5/10 ];    <span class="comment">% loaded die</span>
+T = [0.50 , 0.50; 0.25, 0.75];
+len = 100; <span class="comment">% if len is too short, may not observe something in the sequence</span>
+numSeq = 100;
+seq = ml_sampleMC(T, pi, numSeq, len);
+obs = zeros(numSeq, len);
+[~, seqLen] = size(O);
+
+<span class="comment">% generate observation states from distribution at each hidden state</span>
+X = zeros(numSeq, len);
+<span class="keyword">for</span> k = 1:len
+    <span class="keyword">for</span> p = 1:numSeq
+        X(p, k) = ml_randSampleDiscrete(O(seq(k), :));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+options_hmm_unknown = [];
+options_hmm_unknown.nHiddenStatesGuess = 2;
+options_hmm_unknown.nObservableStatesGuess = 6;
+model_hmm_unknown = ml_unsupervised_HMM(X, options_hmm_unknown);
+[Ohat, That] = model_hmm_unknown.BaumWelch(model_hmm_unknown);
+disp(<span class="string">'True emission probabilities:'</span>)
+disp(O);
+disp(<span class="string">'Learned emissions probabilities:'</span>)
+disp(Ohat);
+disp(<span class="string">'True transition probabilities:'</span>)
+disp(T);
+disp(<span class="string">'Learned transition probabilities:'</span>)
+disp(That);
+</pre><pre class="codeoutput">True emission probabilities:
+    0.1667    0.1667    0.1667    0.1667    0.1667    0.1667
+    0.1000    0.1000    0.1000    0.1000    0.1000    0.5000
+
+Learned emissions probabilities:
+    0.1209    0.0911    0.2109    0.0637    0.1644    0.3489
+    0.1533    0.1888    0.0206    0.2192    0.0869    0.3312
+
+True transition probabilities:
+    0.5000    0.5000
+    0.2500    0.7500
+
+Learned transition probabilities:
+    0.4942    0.5058
+    0.6758    0.3242
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Description
+% Demonstrates parameter learning and inference on Hidden Markov Models
+% using classic problem setup of a Casino that switches out a fair die for
+% a loaded die
+
+close all
+clear all
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Generate Sequence Data REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% "Occassionally dishonest casino" example
+O = [1/6 , 1/6 , 1/6 , 1/6 , 1/6 , 1/6  ;  ... % fair die
+     1/10, 1/10, 1/10, 1/10, 1/10, 5/10 ];   % loaded die
+T = [1/2 , 1/2; 1/4, 3/4];     
+pi = [1/2, 1/2];
+len = 25;
+numSeq = 1;
+seq = ml_sampleMC(T, pi, numSeq, len);
+X = zeros(numSeq, len);
+% generate observation states from distribution at each hidden state
+for k = 1:len
+    for p = 1:numSeq
+        X(p, k) = ml_randSampleDiscrete(O(seq(k), :));
+    end
+end
+
+%% Usage with known observation and transition probability matrix: Viterbi
+options_hmm = [];
+options_hmm.observed = O;
+options_hmm.transition = T;
+options_hmm.pi = pi;
+model_hmm = ml_unsupervised_HMM(X, options_hmm);
+viterbiSeq = model_hmm.Viterbi(model_hmm);
+hmmviterbi(X, T, O)
+individuallyBestSeq = model_hmm.individuallyMostLikely(model_hmm);
+disp('Individually most likely latent variable states:')
+disp(individuallyBestSeq);
+disp('True latent variable states:')
+disp(seq)
+disp('Viterbi most likely latent variable sequence:')
+disp(viterbiSeq)
+disp('Misclassification rate for Viterbi:')
+disp(sum(viterbiSeq ~= seq) / length(seq))
+disp('Misclassification rate for Most Likely Individual States:')
+disp(sum(individuallyBestSeq ~= seq) / length(seq))
+
+%% Usage with unknown parameters: Baum Welch (EM) algorithm
+% Learn the parameters of the occassionaly dishonest casino based only on
+% observations and structure assumption
+O = [1/6 , 1/6 , 1/6 , 1/6 , 1/6 , 1/6;  ...  % fair die
+     1/10, 1/10, 1/10, 1/10, 1/10, 5/10 ];    % loaded die
+T = [0.50 , 0.50; 0.25, 0.75];
+len = 100; % if len is too short, may not observe something in the sequence
+numSeq = 100;
+seq = ml_sampleMC(T, pi, numSeq, len);
+obs = zeros(numSeq, len);
+[~, seqLen] = size(O);
+
+% generate observation states from distribution at each hidden state
+X = zeros(numSeq, len);
+for k = 1:len
+    for p = 1:numSeq
+        X(p, k) = ml_randSampleDiscrete(O(seq(k), :));
+    end
+end
+
+options_hmm_unknown = [];
+options_hmm_unknown.nHiddenStatesGuess = 2;
+options_hmm_unknown.nObservableStatesGuess = 6;
+model_hmm_unknown = ml_unsupervised_HMM(X, options_hmm_unknown);
+[Ohat, That] = model_hmm_unknown.BaumWelch(model_hmm_unknown);
+disp('True emission probabilities:')
+disp(O);
+disp('Learned emissions probabilities:')
+disp(Ohat);
+disp('True transition probabilities:')
+disp(T);
+disp('Learned transition probabilities:')
+disp(That);
+
+
+##### SOURCE END #####
+--></body></html>
